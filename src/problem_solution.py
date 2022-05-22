@@ -7,6 +7,17 @@ from shapely.geometry import LineString
 from shape_functions import *
 
 
+def get_fitness(solution):
+    if not solution:
+
+        return 0
+
+    if solution.packing_density == 0:
+        return solution.value
+
+    # the fitness of a valid solution coincides with its value
+    return solution.value + 1 / solution.packing_density
+
 # set plotting font and sizes
 plt.rcParams["font.family"] = "serif"
 plt.rcParams["font.serif"] = "cmss10"
@@ -237,11 +248,12 @@ class Solution(object):
         for i, main_shape in self.placed_items.items():
             min_x, min_y, max_x, max_y = get_bounds(main_shape.shape)
             width = max_x - min_x
-            height = max_y - min_y
             center = get_bounding_rectangle_center(main_shape.shape)
             radius_of_searching = width
             nearest_center_found = False
-            while not nearest_center_found and radius_of_searching < width + 10:
+            min_x, min_y, max_x, max_y = get_bounds(self.problem.container.shape)
+            measure = max(max_x - min_x, max_y - min_y)
+            while not nearest_center_found and radius_of_searching < measure:
                 for j, pc in self.placed_items.items():
                     if j != i:
                         pc_center = get_bounding_rectangle_center(pc.shape)
@@ -250,6 +262,8 @@ class Solution(object):
                             res_sum += Point(center).distance(Point(pc_center))
                             break
                 radius_of_searching += 1
+
+
         return res_sum.real / len(self.placed_items)
 
 
@@ -796,7 +810,8 @@ class Solution(object):
             value_weight_string = "V={}".format(self.value if can_consider_weight else int(self.value))
             if can_consider_weight:
                 value_weight_string += ", W={}, Wmax={}".format(self.weight, self.problem.container.max_weight)
-            ax1.set_title("Items inside the container\n({})".format(value_weight_string), fontsize=13)
+            ax1.set_title("Items inside the container\n({}), Fitness: \n({})".format(value_weight_string, get_fitness(self)), fontsize=13)
+
 
         # determine the range of item profitability ratio, for later coloring of items
         min_profit_ratio = np.inf

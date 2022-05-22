@@ -8,7 +8,6 @@ import pandas as pd
 from shapely.geometry import Polygon, MultiPolygon, Point
 import evolutionary
 import greedy
-import reversible
 import shape_functions
 from circle import Circle
 from common_algorithm_functions import get_time_since, visualize_boxplot_for_data_sequence, print_if_allowed, \
@@ -16,12 +15,9 @@ from common_algorithm_functions import get_time_since, visualize_boxplot_for_dat
 from ellipse import Ellipse
 from problem_solution import Item, Container, Problem, Solution
 
-# types of problems that can be solved: Knapsack-Packing Joint Problem, or Packing Problem
+# Packing Problem
 PACKING_PROBLEM_TYPE = "Packing"
 
-# directory where to save figures and results of the problems created specifically for the Knapsack-Packing Joint Problem
-
-# directory where to save figures and results of instances of the Packing Problem
 PACKING_PROBLEM_DIR = "../out/"
 
 
@@ -36,12 +32,51 @@ def create_packing_problems_with_optimal_solution_values():
 
     container_shape = shape_functions.create_polygon([[3, 3], [7, 20], [28, 25], [23, 10], [17, 2]])
     container = Container(max_weight, container_shape)
-    item_num = 14
+    item_num = 4
     items = [Item(shape_functions.create_rectangle((0, 0), 6, 3), 1., 1.)] * item_num
     problem = Problem(container, items)
     problems.append(problem)
     problem_names.append("Rects in polygon")
     optimal_values.append(item_num)
+
+    # container_shape = shape_functions.create_polygon([[1, 2], [1, 20], [5, 20], [4, 10], [10, 10], [10, 7], [5, 5]])
+    # container = Container(max_weight, container_shape)
+    # item_num = 9
+    # items = [Item(shape_functions.create_rectangle((0, 0), 4, 2), 1., 1.)] * item_num
+    # problem = Problem(container, items)
+    # problems.append(problem)
+    # problem_names.append("Rects in non convex polygon")
+    # optimal_values.append(item_num)
+
+    # container_shape = shape_functions.create_polygon([(1,1), (4,10), (10,10), (14, 5), (18,10),  (24,10), (28,1)])
+    # container = Container(max_weight, container_shape)
+    # item_num = 18
+    # items = [Item(shape_functions.create_rectangle((0, 0), 4, 2), 1., 1.)] * item_num
+    # problem = Problem(container, items)
+    # problems.append(problem)
+    # problem_names.append("Rects in non convex polygon2")
+    # optimal_values.append(item_num)
+
+    # container_shape = shape_functions.create_polygon([(1,1), (4,1), (4,4), (8,4), (8,8), (4,8), (4,12) , (15, 12), (15,1), (20,1) ,(20,20), (1,20)])
+    # container = Container(max_weight, container_shape)
+    # item_num = 23
+    # items = [Item(shape_functions.create_rectangle((0, 0), 4, 2), 1., 1.)] * item_num
+    # problem = Problem(container, items)
+    # problems.append(problem)
+    # problem_names.append("Rects in non convex polygon3")
+    # optimal_values.append(item_num)
+
+    # container_shape = MultiPolygon([(((0, 0), (0.5, 3), (0, 5), (5, 4.5), (5, 0)),
+    #                                  [((0.1, 0.1), (0.1, 0.2), (0.2, 0.2), (0.2, 0.1)),
+    #                                   ((0.3, 0.3), (0.3, 1.2), (1.6, 2.9), (0.75, 0.4)),
+    #                                   ((3.1, 1.5), (3.5, 4.5), (4.9, 4.4), (4.8, 1.2))])])
+    # container = Container(max_weight, container_shape)
+    # item_num = 20
+    # items = [Item(shape_functions.create_rectangle((0, 0), 1, 0.5), 1., 1.)] * item_num
+    # problem = Problem(container, items)
+    # problems.append(problem)
+    # problem_names.append("Rects in multipolygon")
+    # optimal_values.append(item_num)
 
     return problems, problem_names, optimal_values
 
@@ -152,8 +187,8 @@ def perform_experiments(problem_type, output_dir, load_experiments):
         if problems and problem_names and manual_solutions:
 
             # parameters for the experimentation; note: calculating internal times and value evolution can increase the overall time of algorithms (in a slight, almost neglectible way)
-            execution_num = 5  # 1
-            process_num = 5 # 1
+            execution_num = 2  # 1
+            process_num = 2   # 1
             calculate_internal_times = True
             calculate_value_evolution = True
 
@@ -161,8 +196,7 @@ def perform_experiments(problem_type, output_dir, load_experiments):
 
             # solve each problem with each algorithm
             for i, (problem, problem_name, solution) in enumerate(zip(problems, problem_names, manual_solutions)):
-                if i == 1:
-                    break
+
 
                 experiment_dict[problem_name] = {"problem": problem, "manual_solution": solution, "algorithms": dict()}
 
@@ -331,11 +365,6 @@ def visualize_and_save_experiments(experiment_dict, output_dir, can_plots_show_v
 
 
 def main():
-
-    """Main function"""
-
-    # set the type of problem to solve and the output directory
-    # problem_type, output_dir = KNAPSACK_PACKING_PROBLEM_TYPE, KNAPSACK_PACKING_PROBLEM_DIR
     problem_type, output_dir = PACKING_PROBLEM_TYPE, PACKING_PROBLEM_DIR
 
     # whether it should be attempted to load existing experiments, and avoid running new ones
@@ -343,7 +372,6 @@ def main():
 
     # perform (or just load and show) a set of experiments
     perform_experiments(problem_type, output_dir, load_experiments)
-
 
 
 if __name__ == "__main__":

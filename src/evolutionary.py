@@ -47,10 +47,10 @@ MUTATION_REMOVE_WEIGHT = 0.2
 MUTATION_MODIFY_WEIGHT = 0.3
 
 # maximum number of times that the addition of a specific item in a mutation step should be attempted
-MUTATION_ADD_MAX_ATTEMPT_NUM = 50
+MUTATION_ADD_MAX_ATTEMPT_NUM = 30
 
 # maximum number of times that the modification of a specific item's placement in a mutation step should be attempted
-MUTATION_MODIFY_MAX_ATTEMPT_NUM = 10
+MUTATION_MODIFY_MAX_ATTEMPT_NUM = 30
 
 # maximum proportion of the container's side length (for each axis) that can be applied as a position offset in a mutation step of placement modification of the type small position change
 MUTATION_MODIFY_SMALL_POSITION_CHANGE_PROPORTION = 0.2
@@ -98,10 +98,10 @@ CROSSOVER_MIN_FITNESS_FOR_NON_BEST_PROPORTION = 0.95
 CROSSOVER_SHAPE_MIN_AREA_PROPORTION = 0.1
 
 # maximum number of generations
-MAX_GENERATION_NUM = 100
+MAX_GENERATION_NUM = 1
 
 # maximum number of generations to assume that algorithm has converged
-CONVERGE_GENERATION_NUM = 12
+CONVERGE_GENERATION_NUM = 15
 
 # maximum proportion of iterations of the generation of an initial solution in which to specialize in trying to place a specific item
 INITIAL_SOLUTION_GENERATION_FIRST_ITEM_SPECIALIZATION_ITER_PROPORTION = 0.5
@@ -189,9 +189,12 @@ def get_fittest_solution(solutions):
 
         return min_area_solutions[0]
 
+
     min_placing_density_solutions = list()
     min_placing_density = np.inf
     for solution in min_area_solutions:
+        if not solution.placed_items:
+            break
         placing_density = solution.get_placing_density()
 
         if placing_density < min_placing_density:
@@ -982,7 +985,7 @@ def solve_problem(problem, population_size=POPULATION_SIZE, initial_generation_i
 
         # check if fitness has improved in this generation, to discard or contribute to confirm the assumption of convergence
         elite_fitness = get_fitness(elite[0]) if elite else -np.inf
-        if elite_fitness > max_fitness:
+        if elite_fitness - max_fitness > 0.05:
             max_fitness = elite_fitness
             iter_count_without_improvement = 0
         else:
@@ -1022,6 +1025,7 @@ def solve_problem(problem, population_size=POPULATION_SIZE, initial_generation_i
             fitness_per_generation_time += get_time_since(start_time)
 
     # encapsulate all times informatively in a dictionary
+    print("BEST FITNESS: ", get_fitness(best_solution))
     if calculate_times:
         approx_total_time = initial_population_time + parent_selection_time + min_fitness_for_crossover_non_best_time + crossover_time + mutation_time + elite_finding_time + population_update_time + early_stop_time + fitness_per_generation_time
         time_dict = {"Generation of the initial population": (initial_population_time, initial_population_time / approx_total_time), "Parent selection": (parent_selection_time, parent_selection_time / approx_total_time), "Min-fitness-for-crossover-non-best calculation": (min_fitness_for_crossover_non_best_time, min_fitness_for_crossover_non_best_time / approx_total_time), "Crossover": (crossover_time, crossover_time / approx_total_time), "Mutation": (mutation_time, mutation_time / approx_total_time), "Elite finding": (elite_finding_time, elite_finding_time / approx_total_time), "Population update": (population_update_time, population_update_time / approx_total_time), "Early stopping check": (early_stop_time, early_stop_time / approx_total_time), "Population fitness per generation gathering": (fitness_per_generation_time, fitness_per_generation_time / approx_total_time)}

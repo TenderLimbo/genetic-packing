@@ -98,6 +98,9 @@ def visualize_boxplot_for_data_sequence(data_lists, title, labels=None, y_scale_
     legend_lines = [Line2D([0], [0], color="orange", lw=1, ls="-"), Line2D([0], [0], color="g", lw=1, ls="--")]
     ax.legend(legend_lines, ["median", "mean"], loc="upper left", fontsize="large", framealpha=0.6)
 
+
+    plt.xticks(np.arange(0, len(data_lists[0]), 10.0))
+
     if y_scale_override:
         ax.set_yscale(y_scale_override)
         ax.get_yaxis().get_major_formatter().labelOnlyBase = False
